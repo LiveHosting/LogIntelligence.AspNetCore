@@ -1,0 +1,1 @@
+# LogIntelligence.AspNetCore
