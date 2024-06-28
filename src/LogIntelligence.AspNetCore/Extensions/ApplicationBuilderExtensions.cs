@@ -1,5 +1,5 @@
-﻿using LogIntelligence.AspNetCore.Middleware;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
+using LogIntelligence.AspNetCore.Middleware;
 using System;
 using System.Collections.Generic;
 using System.Linq;

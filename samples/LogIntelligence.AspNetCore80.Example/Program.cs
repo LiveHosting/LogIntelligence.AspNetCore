@@ -1,5 +1,5 @@
 using LogIntelligence.AspNetCore.Extensions;
-using LogIntelligence.PublicApi.Client;
+using LogIntelligence.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 

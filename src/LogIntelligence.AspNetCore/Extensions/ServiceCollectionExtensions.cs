@@ -1,4 +1,4 @@
-﻿using LogIntelligence.PublicApi.Client;
+﻿using LogIntelligence.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -13,19 +13,19 @@ namespace LogIntelligence.AspNetCore.Extensions
     {
         public static IServiceCollection AddLogIntelligence(this IServiceCollection services) 
         {
-            services.AddHttpClient<LogIntelligenceApiClient>();
+            services.AddHttpClient<LogIntelligenceClient>();
             return services;
         }
 
-        public static IServiceCollection AddLogIntelligence(this IServiceCollection services, IOptions<LogIntelligenceApiClientOptions> options)
+        public static IServiceCollection AddLogIntelligence(this IServiceCollection services, IOptions<LogIntelligenceOptions> options)
         {
-            services.AddHttpClient<LogIntelligenceApiClient>();
+            services.AddHttpClient<LogIntelligenceClient>();
             return services;
         }
 
-        public static IServiceCollection AddLogIntelligence(this IServiceCollection services, Action<LogIntelligenceApiClientOptions> options)
+        public static IServiceCollection AddLogIntelligence(this IServiceCollection services, Action<LogIntelligenceOptions> options)
         {
-            services.AddHttpClient<LogIntelligenceApiClient>();
+            services.AddHttpClient<LogIntelligenceClient>();
             return services;
         }
     }

@@ -29,7 +29,7 @@ namespace LogIntelligence.AspNetCore.Middleware
             }
             catch (Exception exception)
             {
-                MessageShipper.Ship(exception, exception.GetBaseException().Message, context, options, queue);
+                MessageShipper.Ship(exception, exception.GetBaseException().Message, context, options);
                 throw;
             }
         }

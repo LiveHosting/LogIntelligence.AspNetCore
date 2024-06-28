@@ -22,10 +22,9 @@ namespace LogIntelligence.AspNetCore
             var createMessage = new CreateMessageRequest
             {
                 CreatedDate = utcNow,
-                Detail = Detail(exception, options),
+                Detail = exception?.ToString(),
                 Type = baseException?.GetType().FullName,
                 Title = title,
-                Data = exception.ToDataList(),
                 Cookies = Cookies(context),
                 Form = Form(context),
                 Hostname = Hostname(context),
@@ -40,41 +39,7 @@ namespace LogIntelligence.AspNetCore
             };
 
             TrySetUser(context, createMessage);
-
-            if (options.OnFilter != null && options.OnFilter(createMessage))
-            {
-                return;
-            }
-
-            // Use the OnMessage action on the options for ASP.NET Core directly. We normally use the OnMessage event on the Elmah.Io.Client package.
-            // We don't want to use that here, since that would defer the event to the message handler picking messages from the queue. When this
-            // happens, the HTTP context is no longer available. This would make it impossible to decorate all messages with information from the context.
-            options.OnMessage?.Invoke(createMessage);
-
-            queue.QueueBackgroundWorkItem(async token =>
-            {
-                var elmahioApi = ElmahioAPI.Create(options.ApiKey, new Client.ElmahIoOptions
-                {
-                    WebProxy = options.WebProxy,
-                    Timeout = new TimeSpan(0, 0, 30), // Storing the message is behind a queue why the default timeout of 5 seconds isn't needed here.
-                    UserAgent = UserAgent(),
-                });
-
-                elmahioApi.Messages.OnMessageFail += (sender, args) =>
-                {
-                    options.OnError?.Invoke(args.Message, args.Error);
-                };
-
-                try
-                {
-                    await elmahioApi.Messages.CreateAndNotifyAsync(options.LogId, createMessage, token);
-                }
-                catch (Exception e)
-                {
-                    options.OnError?.Invoke(createMessage, e);
-                    // If there's a Exception while generating the error page, re-throw the original exception.
-                }
-            });
+            
         }
 
         private static string UserAgent()
@@ -111,7 +76,7 @@ namespace LogIntelligence.AspNetCore
             return baseException?.Source;
         }
 
-        private static void TrySetUser(HttpContext context, CreateMessage createMessage)
+        private static void TrySetUser(HttpContext context, CreateMessageRequest createMessage)
         {
             try
             {
@@ -128,13 +93,13 @@ namespace LogIntelligence.AspNetCore
             }
         }
 
-        private static string Severity(Exception exception, HttpContext context)
+        private static Severity? Severity(Exception exception, HttpContext context)
         {
             var statusCode = StatusCode(exception, context);
 
-            if (statusCode.HasValue && statusCode >= 400 && statusCode < 500) return Client.Severity.Warning.ToString();
-            if (statusCode.HasValue && statusCode >= 500) return Client.Severity.Error.ToString();
-            if (exception != null) return Client.Severity.Error.ToString();
+            if (statusCode.HasValue && statusCode >= 400 && statusCode < 500) return LogIntelligence.Client.Severity.Warning;
+            if (statusCode.HasValue && statusCode >= 500) return LogIntelligence.Client.Severity.Error;
+            if (exception != null) return LogIntelligence.Client.Severity.Error;
 
             return null; // Let elmah.io decide when receiving the message
         }
@@ -152,24 +117,16 @@ namespace LogIntelligence.AspNetCore
             return context.Response?.StatusCode;
         }
 
-        private static string Detail(Exception exception, LogIntelligenceApiClientOptions options)
+        private static List<MessageItem> Cookies(HttpContext httpContext)
         {
-            if (exception == null) return null;
-            return options.ExceptionFormatter != null
-                ? options.ExceptionFormatter.Format(exception)
-                : exception.ToString();
+            return httpContext.Request?.Cookies?.Keys.Select(k => new MessageItem(k, httpContext.Request.Cookies[k])).ToList();
         }
 
-        private static List<Item> Cookies(HttpContext httpContext)
-        {
-            return httpContext.Request?.Cookies?.Keys.Select(k => new Item(k, httpContext.Request.Cookies[k])).ToList();
-        }
-
-        private static List<Item> Form(HttpContext httpContext)
+        private static List<MessageItem> Form(HttpContext httpContext)
         {
             try
             {
-                return httpContext.Request?.Form?.Keys.Select(k => new Item(k, httpContext.Request.Form[k])).ToList();
+                return httpContext.Request?.Form?.Keys.Select(k => new MessageItem(k, httpContext.Request.Form[k])).ToList();
             }
             catch (Exception)
             {
@@ -179,25 +136,25 @@ namespace LogIntelligence.AspNetCore
                 // - ConnectionResetException: More than 100 active connections or similar
             }
 
-            return new List<Item>();
+            return new List<MessageItem>();
         }
 
-        private static List<Item> ServerVariables(HttpContext httpContext)
+        private static List<MessageItem> ServerVariables(HttpContext httpContext)
         {
-            var serverVariables = new List<Item>();
+            var serverVariables = new List<MessageItem>();
             serverVariables.AddRange(RequestHeaders(httpContext.Request));
             serverVariables.AddRange(Features(httpContext.Features));
             return serverVariables;
         }
 
-        private static IEnumerable<Item> RequestHeaders(HttpRequest request)
+        private static IEnumerable<MessageItem> RequestHeaders(HttpRequest request)
         {
-            return request?.Headers?.Keys.Select(k => new Item(k, request.Headers[k])).ToList();
+            return request?.Headers?.Keys.Select(k => new MessageItem(k, request.Headers[k])).ToList();
         }
 
-        private static IEnumerable<Item> Features(IFeatureCollection features)
+        private static IEnumerable<MessageItem> Features(IFeatureCollection features)
         {
-            var items = new List<Item>();
+            var items = new List<MessageItem>();
             if (features == null) return items;
 
             foreach (var property in features.GetType().GetProperties())
@@ -205,7 +162,7 @@ namespace LogIntelligence.AspNetCore
                 try
                 {
                     var value = property.GetValue(features);
-                    if (value.IsValidForItems()) items.Add(new Item(property.Name, value.ToString()));
+                    if (value.IsValidForItems()) items.Add(new MessageItem(property.Name, value.ToString()));
                 }
                 catch
                 {
@@ -217,9 +174,9 @@ namespace LogIntelligence.AspNetCore
             return items;
         }
 
-        private static List<Item> QueryString(HttpContext httpContext)
+        private static List<MessageItem> QueryString(HttpContext httpContext)
         {
-            return httpContext.Request?.Query?.Keys.Select(k => new Item(k, httpContext.Request.Query[k])).ToList();
+            return httpContext.Request?.Query?.Keys.Select(k => new MessageItem(k, httpContext.Request.Query[k])).ToList();
         }
     }
 }

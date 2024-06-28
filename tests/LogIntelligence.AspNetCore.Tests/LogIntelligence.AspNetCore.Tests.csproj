@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LogIntelligence.AspNetCore\LogIntelligence.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\LogIntelligence.AspNetCore\LogIntelligence.AspNetCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
