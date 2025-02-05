@@ -14,7 +14,7 @@ namespace LogIntelligence.AspNetCore.Extensions
         {
             ArgumentNullException.ThrowIfNull(app, nameof(app));
 
-            return app.UseMiddleware<LogIntelligenceMiddileware>();
+            return app.UseMiddleware<LogIntelligenceMiddleware>();
         }
     }
 }

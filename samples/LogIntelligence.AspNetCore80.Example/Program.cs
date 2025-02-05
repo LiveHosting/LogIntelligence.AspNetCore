@@ -1,37 +1,21 @@
+using LogIntelligence.AspNetCore;
 using LogIntelligence.AspNetCore.Extensions;
-using LogIntelligence.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// IMPORTANT: this is where the magic happens. Insert your api key found on the profile as well as the log id of the log to log to.
-builder.Services.AddLogIntelligence(options =>
+builder.Logging.AddLogIntelligence(options =>
 {
     options.ApiKey = Guid.Parse("db7c007f-a323-4d78-9342-4322b7403bbe");
-    options.LogID = new Guid("db7c007f-a323-4d78-9342-4322b7403bbe");
-
-    // Optional application name
-    options.Application = "ASP.NET Core Razor Pages WebApp 8.0 Example Application";
-
-    // Add event handlers etc. like this:
-    //options.OnMessage = msg =>
-    //{
-    //    msg.Version = "8.0.0";
-    //};
+    options.LogID = Guid.Parse("db7c007f-a323-4d78-9342-4322b7403bbe");
+    options.ApplicationName = "AspNetCore 8.0 Example WebApp using LogIntelligence.Extensions.Logging";
 });
 
-// ApiKey and LogId can be configured in appsettings.json as well, by calling the Configure-method instead of AddElmahIo.
-//builder.Services.Configure<LogIntelligenceApiClientOptions>(builder.Configuration.GetSection("LogIntelligenceApiClientOptions"));
-// Still need to call this to register all dependencies
-//builder.Services.AddLogIntelligence();
+// The LogIntelligence Logger Provider can log any log level, but we recommend only to log warning and up
+builder.Logging.AddFilter<LogIntelligenceLoggerProvider>(null, LogLevel.Information);
 
-// If you configure ApiKey and LogId through appsettings.json, you can still add event handlers, configure handled status codes, etc.
-//builder.Services.Configure<LogIntelligenceApiClientOptions>(o =>
-//{
-//    o.OnMessage = msg =>
-//    {
-//        msg.Version = "8.0.0";
-//    };
-//});
+// Add a filter to exclude information logs from System.Net.Http.HttpClient.LogIntelligenceClient.LogicalHandler
+//builder.Logging.AddFilter<LogIntelligenceLoggerProvider>("System.Net.Http.HttpClient.LogIntelligenceClient.LogicalHandler", Microsoft.Extensions.Logging.LogLevel.Warning);
+//builder.Logging.AddFilter<LogIntelligenceLoggerProvider>("System.Net.Http.HttpClient.LogIntelligenceClient.ClientHandler", Microsoft.Extensions.Logging.LogLevel.Warning);
 
 // Add services to the container.
 builder.Services.AddRazorPages();

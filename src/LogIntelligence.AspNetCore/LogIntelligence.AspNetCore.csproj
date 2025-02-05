@@ -13,12 +13,13 @@
 		<PackageTags>Error;Exception;Reporting;Management;Logging;LogIntelligence;Diagnostics;Tracing</PackageTags>
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<Version>2.0.8</Version>
+		<Version>2.0.12</Version>
+		<PackageOutputPath>..\..\..\LogIntelligence.Nuget.Packages\</PackageOutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="LogIntelligence.Client" Version="2.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="LogIntelligence.Client" Version="2.0.46" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

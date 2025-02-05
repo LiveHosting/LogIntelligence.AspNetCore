@@ -8,3 +8,25 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="card">
+    <div class=card-header>
+        <h4>Log Messages</h4>
+    </div>
+    <form method="post">
+        <div class="card-body">
+        </div>
+        <div class="card-footer">
+            <button asp-page-handler="GenerateTrace" type="submit" class="btn btn-dark">Generate Trace</button>
+            <button asp-page-handler="GenerateDebug" type="submit" class="btn btn-secondary">Generate Debug</button>
+            <button asp-page-handler="GenerateInformation" type="submit" class="btn btn-info">Generate Information</button>
+            <button asp-page-handler="GenerateWarning" type="submit" class="btn btn-warning">Generate Warning</button>
+            <button asp-page-handler="GenerateError" type="submit" class="btn btn-danger">Generate Error</button>
+            <button asp-page-handler="GenerateCritical" type="submit" class="btn btn-outline-danger">Generate Critical</button>
+
+
+            <button asp-page-handler="GenerateNotImplementedException" type="submit" class="btn btn-danger">Generate NotImplemented Exception</button>
+            <button asp-page-handler="GenerateDivideByZeroException" type="submit" class="btn btn-danger">Generate DivideByZeroException</button>
+        </div>
+    </form>
+</div>
